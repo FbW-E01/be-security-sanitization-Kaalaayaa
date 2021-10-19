@@ -329,54 +329,59 @@
     <div class="container">
       <h2>&bull; Message list &bull;</h2>
       <script type="module">
+        
+        async function start(){
+          document.querySelector("#contact_form").addEventListener("submit", e => e.preventDefault())
 
-        document.querySelector("#contact_form").addEventListener("submit", e => e.preventDefault())
+              const backend = "http://localhost:3012";
 
-        const backend = "http://localhost:3012";
+              const msg = document.querySelector("#msg");
+              const add = document.querySelector("#form_button");
+              const list = document.querySelector("#messagelist");
 
-        const msg = document.querySelector("#msg");
-        const add = document.querySelector("#form_button");
-        const list = document.querySelector("#messagelist");
+              add.addEventListener("click", async (e) => {
+                const data = {
+                  message: document.querySelector("#message_input").value,
+                  country: document.querySelector("#country").value,
+                  telephone: document.querySelector("#telephone_input").value,
+                  email: document.querySelector("#email_input").value,
+                  name: document.querySelector("#name_input").value,
+                };
 
-        add.addEventListener("click", async (e) => {
-          const data = {
-            message: document.querySelector("#message_input").value,
-            country: document.querySelector("#country").value,
-            telephone: document.querySelector("#telephone_input").value,
-            name: document.querySelector("#name_input").value,
-          };
+                const headers = { "Content-Type": "application/json" };
+                const opts = { method: "POST", headers, body: JSON.stringify(data) };
+                try {
+                  const res = await fetch(backend + "/contact", opts);
+                  const result = await res.json();
+                  if (result._id) {
+                    location.reload();
+                  } else {
+                    alert(JSON.stringify(result))
+                  }
+                } catch (e) {
+                  console.error(e);
+                  alert("Unable to contact backend at " + backend);
+                }
+              });
 
-          const headers = { "Content-Type": "application/json" };
-          const opts = { method: "POST", headers, body: JSON.stringify(data) };
-          try {
-            const res = await fetch(backend + "/contact", opts);
-            const result = await res.json();
-            if (result._id) {
-                location.reload();
-            } else {
-              alert("A strange looking response was encountered. Your message might not be saved...")
-            }
-          } catch (e) {
-            console.error(e);
-            alert("Unable to contact backend at " + backend);
-          }
-        });
+              try {
+                const res = await fetch(backend + "/contact");
+                const msgs = await res.json();
 
-        try {
-            const res = await fetch(backend + "/contact");
-            const msgs = await res.json();
-
-            msgs.forEach((m) =>
-            list.insertAdjacentHTML(
-                "afterend",
-                `<p>A friend from ${m.country}: &quot;${m.message}&quot; </p>`
-            )
-            );
-        } catch (e) {
-            console.error(e);
-            alert("Unable to contact backend at " + backend);
+                msgs.forEach((m) =>
+                  list.insertAdjacentHTML(
+                    "afterend",
+                    `<p>A friend from ${m.country}: &quot;${m.message}&quot; </p>`
+                  )
+                );
+              } catch (e) {
+                console.error(e);
+                alert("Unable to contact backend at " + backend);
+              }
+          
         }
-      </script>
+        start()
+        </script>
       <div id="messagelist"></div>
     </div>
   </body>
